@@ -1,6 +1,31 @@
 use crate::AccountId;
+use aurora_engine_types::types::Yocto;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct StorageBalance {
+    pub total: Yocto,
+    pub available: Yocto,
+}
+
+impl Default for StorageBalance {
+    fn default() -> Self {
+        Self {
+            total: Yocto::new(0),
+            available: Yocto::new(0),
+        }
+    }
+}
+
+// impl TryFrom<JsonValue> for StorageBalanceOfCallArgs {
+//     type Error = error::ParseTypeFromJsonError;
+//
+//     fn try_from(v: JsonValue) -> Result<Self, Self::Error> {
+//         let account_id = AccountId::try_from(v.string("account_id")?)?;
+//         Ok(Self { account_id })
+//     }
+// }
 
 /// Json-encoded parameters for the `new` function.
 #[derive(Debug, Clone, PartialEq, Eq, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
@@ -79,8 +104,8 @@ pub struct FtOnTransferInput {
     pub msg: String,
 }
 
-#[cfg(feature = "deposit-withdraw")]
-#[derive(Debug, Eq, PartialEq, Clone, BorshSerialize, BorshDeserialize)]
+// #[cfg(feature = "deposit-withdraw")]
+#[derive(Debug, Default, Eq, PartialEq, Clone, BorshSerialize, BorshDeserialize)]
 pub struct ProofInput {
     pub log_index: u64,
     pub log_entry_data: Vec<u8>,
@@ -88,6 +113,12 @@ pub struct ProofInput {
     pub receipt_data: Vec<u8>,
     pub header_data: Vec<u8>,
     pub proof: Vec<Vec<u8>>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, BorshSerialize, BorshDeserialize)]
+pub struct IsUsedProofCallArgs {
+    /// Proof data
+    pub proof: ProofInput,
 }
 
 #[cfg(feature = "deposit-withdraw")]

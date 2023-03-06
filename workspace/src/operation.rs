@@ -1,11 +1,11 @@
+#![allow(dead_code)]
 use crate::error::Error;
 use crate::result::ExecutionSuccess;
 use crate::types::output::SubmitResult;
 use crate::Result;
 use aurora_engine::fungible_token::FungibleTokenMetadata;
-use aurora_engine::parameters::{StorageBalance, TransactionStatus, WithdrawResult};
+use aurora_engine::parameters::{StorageBalance, TransactionStatus};
 use aurora_engine_sdk::promise::PromiseId;
-use aurora_engine_types::types::Wei;
 use aurora_workspace_types::AccountId;
 use borsh::BorshDeserialize;
 #[cfg(feature = "ethabi")]
@@ -102,6 +102,7 @@ impl AsRef<str> for Call {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct ViewResultDetails<T> {
     pub result: T,
     pub logs: Vec<String>,
@@ -223,7 +224,7 @@ impl TryFrom<workspaces::result::ViewResultDetails> for ViewResultDetails<bool> 
     type Error = Error;
 
     fn try_from(view: workspaces::result::ViewResultDetails) -> Result<Self> {
-        let is_proof_used: bool = borsh::try_from_slice_with_schema(view.result.as_slice())?;
+        let is_proof_used: bool = serde_json::from_slice(view.result.as_slice())?;
         Ok(Self {
             result: is_proof_used,
             logs: view.logs,
@@ -257,8 +258,10 @@ impl TryFrom<workspaces::result::ViewResultDetails> for ViewResultDetails<Fungib
     type Error = Error;
 
     fn try_from(view: workspaces::result::ViewResultDetails) -> Result<Self> {
+        let result: FungibleTokenMetadata =
+            FungibleTokenMetadata::try_from_slice(view.result.as_slice())?;
         Ok(Self {
-            result: serde_json::from_slice(view.result.as_slice())?,
+            result,
             logs: view.logs,
         })
     }
